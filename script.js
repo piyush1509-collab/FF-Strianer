@@ -1,50 +1,77 @@
 function addRow() {
-  const table = document.getElementById("dataTable").getElementsByTagName('tbody')[0];
-  const row = table.insertRow();
+  const tableBody = document.getElementById('tableBody');
+  const row = document.createElement('tr');
+
   row.innerHTML = `
-    <td><input type="text" placeholder="e.g. EGC2 Strainer" /></td>
-    <td><input type="date" /></td>
-    <td><input type="date" /></td>
-    <td><button onclick="removeRow(this)">X</button></td>
+    <td><input type="text" placeholder="e.g. FF2" /></td>
+    <td>
+      <div class="date-pairs">
+        <div class="pair">
+          <input type="date" placeholder="Start Date" />
+          <input type="date" placeholder="End Date" />
+        </div>
+      </div>
+    </td>
+    <td>
+      <button onclick="addDatePair(this)">+ Period</button>
+      <button onclick="removeRow(this)">🗑️</button>
+    </td>
   `;
+
+  tableBody.appendChild(row);
 }
 
 function removeRow(btn) {
-  const row = btn.parentNode.parentNode;
-  row.parentNode.removeChild(row);
+  const row = btn.closest('tr');
+  row.remove();
+}
+
+function addDatePair(btn) {
+  const container = btn.closest('tr').querySelector('.date-pairs');
+  const pair = document.createElement('div');
+  pair.className = 'pair';
+  pair.innerHTML = `
+    <input type="date" placeholder="Start Date" />
+    <input type="date" placeholder="End Date" />
+  `;
+  container.appendChild(pair);
 }
 
 function generateChart() {
-  const rows = document.querySelectorAll("#dataTable tbody tr");
+  const rows = document.querySelectorAll("#tableBody tr");
   let data = [];
 
   rows.forEach(row => {
-    const cells = row.querySelectorAll("td input");
-    const equipment = cells[0].value;
-    const start = cells[1].value;
-    const end = cells[2].value;
+    const equipmentName = row.querySelector('td input[type="text"]').value;
+    const datePairs = row.querySelectorAll('.pair');
 
-    if (equipment && start && end) {
-      data.push({
-        x: [start, end],
-        y: [equipment, equipment],
-        type: 'scatter',
-        mode: 'lines',
-        line: { width: 20 },
-        name: equipment,
-        hoverinfo: 'x+y+name'
-      });
-    }
+    datePairs.forEach(pair => {
+      const inputs = pair.querySelectorAll('input');
+      const start = inputs[0].value;
+      const end = inputs[1].value;
+
+      if (equipmentName && start && end) {
+        data.push({
+          x: [start, end],
+          y: [equipmentName, equipmentName],
+          type: 'scatter',
+          mode: 'lines',
+          line: { width: 20 },
+          name: equipmentName,
+          hoverinfo: 'x+y+name'
+        });
+      }
+    });
   });
 
   if (data.length === 0) {
-    alert("Please enter at least one valid row.");
+    alert("Please fill in at least one valid entry.");
     return;
   }
 
   Plotly.newPlot('chart', data, {
-    title: 'Equipment Replacement Gantt Chart',
-    xaxis: { type: 'date', title: 'Timeline' },
+    title: 'Equipment Gantt Chart with Multiple Time Periods',
+    xaxis: { type: 'date', title: 'Date' },
     yaxis: { title: 'Equipment', automargin: true }
   });
 }
