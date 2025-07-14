@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Interactive Gantt Chart</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="script.js" defer></script>
+  <style>
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+      padding: 6px;
+    }
+    input[type="text"], input[type="date"] {
+      width: 100%;
+    }
+    #chart {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Enter Equipment Data</h2>
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>Equipment Name</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Remove</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><input type="text" placeholder="e.g. EGC1 Strainer" /></td>
+        <td><input type="date" /></td>
+        <td><input type="date" /></td>
+        <td><button onclick="removeRow(this)">X</button></td>
+      </tr>
+    </tbody>
+  </table>
+  <br />
+  <button onclick="addRow()">Add Row</button>
+  <button onclick="generateChart()">Generate Gantt Chart</button>
+
+  <div id="chart"></div>
+</body>
+</html>
