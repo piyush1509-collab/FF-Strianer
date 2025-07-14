@@ -4,22 +4,26 @@ function addRow() {
 
   row.innerHTML = `
     <td><input type="text" placeholder="e.g. FF2" /></td>
-    <td>
-      <div class="date-pairs">
-        <div class="pair">
-          <input type="date" placeholder="Start Date" />
-          <input type="date" placeholder="End Date" />
-        </div>
-      </div>
+    <td><input type="date" class="initial-start" /></td>
+    <td class="end-dates">
+      <input type="date" />
     </td>
     <td>
-      <button onclick="addDatePair(this)">+ Period</button>
+      <button onclick="addEndDate(this)">+ Replacement</button>
       <button onclick="removeRow(this)">🗑️</button>
     </td>
   `;
 
   tableBody.appendChild(row);
 }
+
+function addEndDate(btn) {
+  const container = btn.closest('tr').querySelector('.end-dates');
+  const endInput = document.createElement('input');
+  endInput.type = 'date';
+  container.appendChild(endInput);
+}
+
 
 function removeRow(btn) {
   const row = btn.closest('tr');
@@ -43,16 +47,18 @@ function generateChart() {
 
   rows.forEach(row => {
     const equipmentName = row.querySelector('td input[type="text"]').value;
-    const datePairs = row.querySelectorAll('.pair');
+    const startInput = row.querySelector('.initial-start');
+    const endInputs = row.querySelectorAll('.end-dates input');
 
-    datePairs.forEach(pair => {
-      const inputs = pair.querySelectorAll('input');
-      const start = inputs[0].value;
-      const end = inputs[1].value;
+    if (!equipmentName || !startInput.value || endInputs.length === 0) return;
 
-      if (equipmentName && start && end) {
+    let currentStart = startInput.value;
+
+    endInputs.forEach(endInput => {
+      const end = endInput.value;
+      if (currentStart && end) {
         data.push({
-          x: [start, end],
+          x: [currentStart, end],
           y: [equipmentName, equipmentName],
           type: 'scatter',
           mode: 'lines',
@@ -60,6 +66,9 @@ function generateChart() {
           name: equipmentName,
           hoverinfo: 'x+y+name'
         });
+
+        // Set the end of this segment as the start of the next one
+        currentStart = end;
       }
     });
   });
@@ -70,8 +79,9 @@ function generateChart() {
   }
 
   Plotly.newPlot('chart', data, {
-    title: 'Equipment Gantt Chart with Multiple Time Periods',
+    title: 'Equipment Lifecycle Gantt Chart',
     xaxis: { type: 'date', title: 'Date' },
     yaxis: { title: 'Equipment', automargin: true }
   });
 }
+
