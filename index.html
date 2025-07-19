@@ -4,11 +4,12 @@
   <title>Interactive Gantt Chart</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script defer>
+    let equipmentColors = {}; // Unique color per equipment
+
     function addRow() {
-      const tableBody = document.getElementById("tableBody");
-
+      const table = document.getElementById("tableBody");
       const row = document.createElement("tr");
-
+      const color = getRandomColor();
       row.innerHTML = `
         <td><input type="text" placeholder="e.g. EGC1" /></td>
         <td>
@@ -16,6 +17,8 @@
             <div class="pair">
               <input type="date" placeholder="Start Date" />
               <input type="date" placeholder="End Date" />
+              <input type="text" placeholder="Vendor Name" />
+              <input type="color" value="${color}" />
             </div>
           </div>
         </td>
@@ -24,58 +27,60 @@
           <button onclick="removeRow(this)">🗑️</button>
         </td>
       `;
-
-      tableBody.appendChild(row);
+      table.appendChild(row);
     }
 
-    function addDatePair(button) {
-      const datePairsDiv = button.closest('tr').querySelector('.date-pairs');
+    function removeRow(btn) {
+      btn.closest("tr").remove();
+    }
 
+    function addDatePair(btn) {
       const pairDiv = document.createElement("div");
       pairDiv.classList.add("pair");
-
       pairDiv.innerHTML = `
         <input type="date" placeholder="Start Date" />
         <input type="date" placeholder="End Date" />
+        <input type="text" placeholder="Vendor Name" />
+        <input type="color" value="${getRandomColor()}" />
       `;
-
-      datePairsDiv.appendChild(pairDiv);
+      btn.closest("tr").querySelector(".date-pairs").appendChild(pairDiv);
     }
 
-    function removeRow(button) {
-      const row = button.closest('tr');
-      row.remove();
+    function getRandomColor() {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) color += letters[Math.floor(Math.random() * 16)];
+      return color;
     }
 
     function generateChart() {
-      const rows = document.querySelectorAll("#tableBody tr");
-
       const data = [];
-
+      const rows = document.querySelectorAll("#tableBody tr");
+      const summary = [];
       rows.forEach(row => {
-        const name = row.querySelector("td input[type='text']").value.trim();
+        const name = row.cells[0].querySelector("input").value;
         const pairs = row.querySelectorAll(".pair");
-
         pairs.forEach(pair => {
-          const dates = pair.querySelectorAll("input[type='date']");
-          const startDate = dates[0].value;
-          const endDate = dates[1].value;
-
-          if (name && startDate && endDate) {
+          const start = pair.querySelectorAll("input")[0].value;
+          const end = pair.querySelectorAll("input")[1].value;
+          const vendor = pair.querySelectorAll("input")[2].value;
+          const color = pair.querySelectorAll("input")[3].value;
+          if (start && end) {
             data.push({
-              x: [startDate, endDate],
+              x: [start, end],
               y: [name, name],
               mode: "lines",
-              line: { width: 20 },
-              name: name,
-              hoverinfo: "x+y"
+              line: { color: color, width: 20 },
+              name: `${name} (${vendor})`,
+              hoverinfo: "text",
+              text: `${name}<br>Vendor: ${vendor}<br>${start} to ${end}`,
             });
           }
         });
       });
 
-      const layout = {
-        title: "Equipment Replacement Timeline",
+      Plotly.newPlot("chart", data, {
+        title: "Gantt Chart",
         plot_bgcolor: "#1A1A1A",
         paper_bgcolor: "#1A1A1A",
         font: { color: "#E0E0E0" },
@@ -83,17 +88,16 @@
           title: "Date",
           showgrid: true,
           gridcolor: "#333",
-          zeroline: false
+          tickformat: "%Y-%m-%d"
         },
         yaxis: {
           title: "Equipment",
-          type: 'category',
+          type: "category",
           showgrid: true,
           gridcolor: "#333"
-        }
-      };
-
-      Plotly.newPlot("chart", data, layout);
+        },
+        hovermode: 'closest'
+      });
     }
   </script>
   <style>
@@ -134,13 +138,14 @@
       background-color: #2C2C2C;
     }
 
-    input[type="text"], input[type="date"] {
+    input[type="text"], input[type="date"], input[type="color"] {
       background-color: #1A1A1A;
       border: 1px solid #444;
       color: #fff;
       padding: 6px;
       border-radius: 4px;
-      width: 95%;
+      margin-top: 4px;
+      width: 90%;
     }
 
     button {
@@ -185,6 +190,8 @@
             <div class="pair">
               <input type="date" placeholder="Start Date" />
               <input type="date" placeholder="End Date" />
+              <input type="text" placeholder="Vendor Name" />
+              <input type="color" value="#00ADB5" />
             </div>
           </div>
         </td>
@@ -200,6 +207,8 @@
   <button onclick="generateChart()">Generate Gantt Chart</button>
 
   <div id="chart"></div>
+
 </body>
 </html>
+
 
