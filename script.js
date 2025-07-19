@@ -1,87 +1,104 @@
 function addRow() {
   const tableBody = document.getElementById('tableBody');
   const row = document.createElement('tr');
-
   row.innerHTML = `
-    <td><input type="text" placeholder="e.g. FF2" /></td>
-    <td><input type="date" class="initial-start" /></td>
-    <td class="end-dates">
-      <input type="date" />
+    <td><input type="text" placeholder="e.g. EGC1" /></td>
+    <td>
+      <div class="date-pairs">
+        <div class="pair">
+          <input type="date" />
+          <input type="date" />
+        </div>
+      </div>
     </td>
     <td>
-      <button onclick="addEndDate(this)">+ Replacement</button>
+      <input type="color" value="#00ADB5" />
+      <button onclick="addDatePair(this)">+ Period</button>
       <button onclick="removeRow(this)">🗑️</button>
     </td>
   `;
-
   tableBody.appendChild(row);
 }
 
-function addEndDate(btn) {
-  const container = btn.closest('tr').querySelector('.end-dates');
-  const endInput = document.createElement('input');
-  endInput.type = 'date';
-  container.appendChild(endInput);
-}
-
-
-function removeRow(btn) {
-  const row = btn.closest('tr');
-  row.remove();
-}
-
-function addDatePair(btn) {
-  const container = btn.closest('tr').querySelector('.date-pairs');
+function addDatePair(button) {
+  const td = button.parentNode;
+  const datePairsDiv = td.parentNode.querySelector('.date-pairs');
   const pair = document.createElement('div');
   pair.className = 'pair';
   pair.innerHTML = `
-    <input type="date" placeholder="Start Date" />
-    <input type="date" placeholder="End Date" />
+    <input type="date" />
+    <input type="date" />
   `;
-  container.appendChild(pair);
+  datePairsDiv.appendChild(pair);
+}
+
+function removeRow(button) {
+  button.closest('tr').remove();
 }
 
 function generateChart() {
-  const rows = document.querySelectorAll("#tableBody tr");
-  let data = [];
+  const rows = document.querySelectorAll('#tableBody tr');
+  const data = [];
 
   rows.forEach(row => {
-    const equipmentName = row.querySelector('td input[type="text"]').value;
-    const startInput = row.querySelector('.initial-start');
-    const endInputs = row.querySelectorAll('.end-dates input');
+    const name = row.cells[0].querySelector('input').value;
+    const color = row.cells[2].querySelector('input[type=color]').value;
+    const datePairs = row.querySelectorAll('.pair');
 
-    if (!equipmentName || !startInput.value || endInputs.length === 0) return;
+    datePairs.forEach(pair => {
+      const dates = pair.querySelectorAll('input[type=date]');
+      const startDate = dates[0].value;
+      const endDate = dates[1].value;
 
-    let currentStart = startInput.value;
-
-    endInputs.forEach(endInput => {
-      const end = endInput.value;
-      if (currentStart && end) {
+      if (startDate && endDate) {
         data.push({
-          x: [currentStart, end],
-          y: [equipmentName, equipmentName],
+          x: [startDate, endDate],
+          y: [name, name],
           type: 'scatter',
           mode: 'lines',
-          line: { width: 20 },
-          name: equipmentName,
-          hoverinfo: 'x+y+name'
+          line: {
+            color: color,
+            width: 20,
+            shape: 'hv'
+          },
+          hovertemplate: `<b>${name}</b><br>Start: ${startDate}<br>End: ${endDate}<extra></extra>`
         });
-
-        // Set the end of this segment as the start of the next one
-        currentStart = end;
       }
     });
   });
 
-  if (data.length === 0) {
-    alert("Please fill in at least one valid entry.");
-    return;
-  }
+  const layout = {
+    title: {
+      text: 'Equipment Replacement Timeline',
+      font: { color: '#00ADB5' }
+    },
+    xaxis: {
+      title: 'Date',
+      showgrid: true,
+      gridcolor: '#444',
+      tickformat: "%Y-%m-%d",
+      tickangle: -45
+    },
+    yaxis: {
+      title: 'Equipment',
+      showgrid: true,
+      gridcolor: '#444'
+    },
+    plot_bgcolor: "#1A1A1A",
+    paper_bgcolor: "#1A1A1A",
+    font: { color: "#E0E0E0" },
+    hovermode: 'x',
+    shapes: [
+      {
+        type: 'line',
+        x0: 0, x1: 0,
+        y0: 0, y1: 1,
+        xref: 'x', yref: 'paper',
+        line: { color: '#888', width: 1, dash: 'dot' }
+      }
+    ]
+  };
 
-  Plotly.newPlot('chart', data, {
-    title: 'Equipment Lifecycle Gantt Chart',
-    xaxis: { type: 'date', title: 'Date' },
-    yaxis: { title: 'Equipment', automargin: true }
-  });
+  Plotly.newPlot('chart', data, layout);
 }
 
