@@ -6,21 +6,33 @@
   <style>
     body {
       background-color: #121212;
-      color: white;
+      color: #E0E0E0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       padding: 20px;
     }
+
+    h2 {
+      color: #00ADB5;
+      margin-bottom: 20px;
+    }
+
     #chart {
-      width: 100%;
-      height: 600px;
       background-color: #1A1A1A;
-      border: 1px solid #444;
-      border-radius: 10px;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #333;
+    }
+
+    .loading {
+      color: #888;
+      font-style: italic;
     }
   </style>
 </head>
+
 <body>
   <h2>Gantt Chart Visualization</h2>
-  <div id="chart">Loading...</div>
+  <div id="chart" class="loading">Loading chart...</div>
 
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbx0ONP7n--dNO1ygXdfBUS_m83iqDujWxsaexbPO6qPW41lWK34TG0HK7ARwUgiUV1i/exec';
@@ -44,14 +56,29 @@
         Plotly.newPlot('chart', traces, {
           title: 'Equipment Replacement Gantt Chart',
           yaxis: {
-            type: 'category'
+            type: 'category',
+            title: 'Equipment',
+            gridcolor: '#333'
           },
-          plot_bgcolor: '#121212',
-          paper_bgcolor: '#121212',
-          font: { color: 'white' }
+          xaxis: {
+            title: 'Date',
+            tickformat: '%Y-%m-%d',
+            gridcolor: '#333'
+          },
+          plot_bgcolor: '#1A1A1A',
+          paper_bgcolor: '#1A1A1A',
+          font: { color: '#E0E0E0' },
+          hovermode: 'closest'
         });
+
+        document.getElementById('chart').classList.remove('loading');
+      })
+      .catch(err => {
+        document.getElementById('chart').innerHTML = "Failed to load chart.";
+        console.error("Error loading data:", err);
       });
   </script>
 </body>
 </html>
+
 
