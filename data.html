@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Enter Equipment Data</title>
+  <title>Equipment Data Entry</title>
   <style>
     body {
       background-color: #121212;
@@ -54,6 +54,8 @@
   </style>
 
   <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbx0ONP7n--dNO1ygXdfBUS_m83iqDujWxsaexbPO6qPW41lWK34TG0HK7ARwUgiUV1i/exec';
+
     function addRow() {
       const table = document.getElementById("tableBody");
       const row = document.createElement("tr");
@@ -98,11 +100,43 @@
       const letters = '0123456789ABCDEF';
       return '#' + Array.from({ length: 6 }).map(() => letters[Math.floor(Math.random() * 16)]).join('');
     }
+
+    async function saveData() {
+      const rows = document.querySelectorAll("#tableBody tr");
+      for (const row of rows) {
+        const name = row.cells[0].querySelector("input").value;
+        const pairs = row.querySelectorAll(".pair");
+        for (const pair of pairs) {
+          const start = pair.querySelectorAll("input")[0].value;
+          const end = pair.querySelectorAll("input")[1].value;
+          const vendor = pair.querySelectorAll("input")[2].value;
+          const color = pair.querySelectorAll("input")[3].value;
+
+          if (start && end && name) {
+            const payload = {
+              equipment: name,
+              startDate: start,
+              endDate: end,
+              vendor: vendor,
+              color: color
+            };
+
+            await fetch(API_URL, {
+              method: 'POST',
+              body: JSON.stringify(payload),
+              headers: { 'Content-Type': 'application/json' }
+            });
+          }
+        }
+      }
+
+      alert("✅ Data saved successfully.");
+    }
   </script>
 </head>
 
 <body>
-  <h2>Equipment Data Entry</h2>
+  <h2 style="color:#00ADB5;">Equipment Data Entry</h2>
 
   <table>
     <thead>
@@ -134,8 +168,8 @@
   </table>
 
   <button onclick="addRow()">Add Equipment</button>
+  <button onclick="saveData()">💾 Save Data</button>
 </body>
 </html>
-
 
 
