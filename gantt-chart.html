@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Equipment Gantt Chart</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body {
+      background-color: #121212;
+      color: #E0E0E0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      padding: 20px;
+    }
+
+    h2 {
+      color: #00ADB5;
+      margin-bottom: 20px;
+    }
+
+    #chart {
+      background-color: #1A1A1A;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #333;
+    }
+  </style>
+</head>
+<body>
+  <h2>Equipment Gantt Chart</h2>
+  <div id="chart"></div>
+
+  <script>
+    const raw = localStorage.getItem("gantData");
+    if (!raw) {
+      alert("No data found. Please enter data on the entry page.");
+    }
+
+    const data = JSON.parse(raw || "[]");
+
+    const colors = ["#00ADB5", "#F08A5D", "#B83B5E", "#6A2C70", "#2E8BC0"];
+    let traces = [];
+
+    data.forEach((item, i) => {
+      traces.push({
+        x: [item.start, item.end],
+        y: [item.equipment, item.equipment],
+        mode: 'lines+markers+text',
+        text: [item.vendor, ''],
+        textposition: 'bottom center',
+        line: { color: colors[i % colors.length], width: 12 },
+        type: 'scatter',
+        name: item.equipment
+      });
+    });
+
+    const layout = {
+      title: 'Equipment Replacement Timeline',
+      xaxis: {
+        title: 'Date',
+        tickformat: "%d %b %Y",
+        showgrid: true,
+        gridcolor: '#444'
+      },
+      yaxis: {
+        title: 'Equipment',
+        showgrid: false
+      },
+      plot_bgcolor: "#1A1A1A",
+      paper_bgcolor: "#121212",
+      font: { color: "#E0E0E0" }
+    };
+
+    Plotly.newPlot('chart', traces, layout);
+  </script>
+</body>
+</html>
