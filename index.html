@@ -3,7 +3,99 @@
 <head>
   <title>Interactive Gantt Chart</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  <script src="script.js" defer></script>
+  <script defer>
+    function addRow() {
+      const tableBody = document.getElementById("tableBody");
+
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td><input type="text" placeholder="e.g. EGC1" /></td>
+        <td>
+          <div class="date-pairs">
+            <div class="pair">
+              <input type="date" placeholder="Start Date" />
+              <input type="date" placeholder="End Date" />
+            </div>
+          </div>
+        </td>
+        <td>
+          <button onclick="addDatePair(this)">+ Period</button>
+          <button onclick="removeRow(this)">🗑️</button>
+        </td>
+      `;
+
+      tableBody.appendChild(row);
+    }
+
+    function addDatePair(button) {
+      const datePairsDiv = button.closest('tr').querySelector('.date-pairs');
+
+      const pairDiv = document.createElement("div");
+      pairDiv.classList.add("pair");
+
+      pairDiv.innerHTML = `
+        <input type="date" placeholder="Start Date" />
+        <input type="date" placeholder="End Date" />
+      `;
+
+      datePairsDiv.appendChild(pairDiv);
+    }
+
+    function removeRow(button) {
+      const row = button.closest('tr');
+      row.remove();
+    }
+
+    function generateChart() {
+      const rows = document.querySelectorAll("#tableBody tr");
+
+      const data = [];
+
+      rows.forEach(row => {
+        const name = row.querySelector("td input[type='text']").value.trim();
+        const pairs = row.querySelectorAll(".pair");
+
+        pairs.forEach(pair => {
+          const dates = pair.querySelectorAll("input[type='date']");
+          const startDate = dates[0].value;
+          const endDate = dates[1].value;
+
+          if (name && startDate && endDate) {
+            data.push({
+              x: [startDate, endDate],
+              y: [name, name],
+              mode: "lines",
+              line: { width: 20 },
+              name: name,
+              hoverinfo: "x+y"
+            });
+          }
+        });
+      });
+
+      const layout = {
+        title: "Equipment Replacement Timeline",
+        plot_bgcolor: "#1A1A1A",
+        paper_bgcolor: "#1A1A1A",
+        font: { color: "#E0E0E0" },
+        xaxis: {
+          title: "Date",
+          showgrid: true,
+          gridcolor: "#333",
+          zeroline: false
+        },
+        yaxis: {
+          title: "Equipment",
+          type: 'category',
+          showgrid: true,
+          gridcolor: "#333"
+        }
+      };
+
+      Plotly.newPlot("chart", data, layout);
+    }
+  </script>
   <style>
     body {
       background-color: #121212;
@@ -108,6 +200,6 @@
   <button onclick="generateChart()">Generate Gantt Chart</button>
 
   <div id="chart"></div>
-
 </body>
 </html>
+
