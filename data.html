@@ -1,63 +1,141 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Data Entry - Gantt Chart</title>
+  <title>Enter Equipment Data</title>
   <style>
     body {
       background-color: #121212;
       color: #E0E0E0;
+      font-family: 'Segoe UI', sans-serif;
       padding: 20px;
-      font-family: sans-serif;
     }
-    input, button {
-      margin: 8px;
-      padding: 8px;
-      background: #1f1f1f;
-      color: white;
-      border: 1px solid #444;
-    }
-    button {
-      background: #00ADB5;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #019ca1;
-    }
-  </style>
-</head>
-<body>
-  <h2>Equipment Replacement Data Entry</h2>
 
-  <label>Equipment Name: <input type="text" id="equipment"></label><br>
-  <label>Start Date: <input type="date" id="start"></label><br>
-  <label>End Date: <input type="date" id="end"></label><br>
-  <label>Vendor Name: <input type="text" id="vendor"></label><br>
-  <label>Color: <input type="color" id="color"></label><br>
-  <button onclick="saveData()">Save</button>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      border: 1px solid #333;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #222;
+      color: #00ADB5;
+    }
+
+    tr:nth-child(even) { background-color: #1E1E1E; }
+    tr:nth-child(odd) { background-color: #2C2C2C; }
+
+    input[type="text"], input[type="date"], input[type="color"] {
+      background-color: #1A1A1A;
+      border: 1px solid #444;
+      color: #fff;
+      padding: 6px;
+      border-radius: 4px;
+      width: 90%;
+    }
+
+    button {
+      background-color: #00ADB5;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      margin: 2px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover { background-color: #019ca1; }
+  </style>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbx0ONP7n--dNO1ygXdfBUS_m83iqDujWxsaexbPO6qPW41lWK34TG0HK7ARwUgiUV1i/exec';
+    function addRow() {
+      const table = document.getElementById("tableBody");
+      const row = document.createElement("tr");
+      const color = getRandomColor();
+      row.innerHTML = `
+        <td><input type="text" placeholder="e.g. EGC1" /></td>
+        <td>
+          <div class="date-pairs">
+            <div class="pair">
+              <input type="date" />
+              <input type="date" />
+              <input type="text" placeholder="Vendor" />
+              <input type="color" value="${color}" />
+            </div>
+          </div>
+        </td>
+        <td>
+          <button onclick="addDatePair(this)">+ Period</button>
+          <button onclick="removeRow(this)">🗑️</button>
+        </td>
+      `;
+      table.appendChild(row);
+    }
 
-    async function saveData() {
-      const data = {
-        equipment: document.getElementById('equipment').value,
-        startDate: document.getElementById('start').value,
-        endDate: document.getElementById('end').value,
-        vendor: document.getElementById('vendor').value,
-        color: document.getElementById('color').value
-      };
+    function removeRow(btn) {
+      btn.closest("tr").remove();
+    }
 
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' }
-      });
+    function addDatePair(btn) {
+      const pair = document.createElement("div");
+      pair.className = "pair";
+      pair.innerHTML = `
+        <input type="date" />
+        <input type="date" />
+        <input type="text" placeholder="Vendor" />
+        <input type="color" value="${getRandomColor()}" />
+      `;
+      btn.closest("tr").querySelector(".date-pairs").appendChild(pair);
+    }
 
-      const result = await res.json();
-      alert("Data Saved: " + result.status);
+    function getRandomColor() {
+      const letters = '0123456789ABCDEF';
+      return '#' + Array.from({ length: 6 }).map(() => letters[Math.floor(Math.random() * 16)]).join('');
     }
   </script>
+</head>
+
+<body>
+  <h2>Equipment Data Entry</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Equipment Name</th>
+        <th>Time Periods</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <tr>
+        <td><input type="text" placeholder="e.g. EGC1" /></td>
+        <td>
+          <div class="date-pairs">
+            <div class="pair">
+              <input type="date" />
+              <input type="date" />
+              <input type="text" placeholder="Vendor" />
+              <input type="color" value="#00ADB5" />
+            </div>
+          </div>
+        </td>
+        <td>
+          <button onclick="addDatePair(this)">+ Period</button>
+          <button onclick="removeRow(this)">🗑️</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <button onclick="addRow()">Add Equipment</button>
 </body>
 </html>
+
 
 
