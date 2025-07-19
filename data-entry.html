@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Equipment Replacement Entry</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #E0E0E0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      padding: 20px;
+    }
+
+    h2 {
+      color: #00ADB5;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      border: 1px solid #333;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #222;
+      color: #00ADB5;
+    }
+
+    tr:nth-child(even) {
+      background-color: #1E1E1E;
+    }
+
+    tr:nth-child(odd) {
+      background-color: #2C2C2C;
+    }
+
+    input[type="text"], input[type="date"] {
+      background-color: #1A1A1A;
+      border: 1px solid #444;
+      color: #fff;
+      padding: 6px;
+      border-radius: 4px;
+      width: 95%;
+    }
+
+    button {
+      background-color: #00ADB5;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      margin: 2px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #019ca1;
+    }
+  </style>
+</head>
+<body>
+  <h2>Equipment Replacement Data Entry</h2>
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>Equipment Name</th>
+        <th>Vendor</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <tr>
+        <td><input type="text" placeholder="e.g. EGC1" /></td>
+        <td><input type="text" placeholder="Vendor" /></td>
+        <td><input type="date" /></td>
+        <td><input type="date" /></td>
+        <td><button onclick="removeRow(this)">🗑️</button></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <button onclick="addRow()">Add Row</button>
+  <button onclick="saveData()">Save to Drive</button>
+
+  <script>
+    function addRow() {
+      const tbody = document.getElementById("tableBody");
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><input type="text" placeholder="e.g. EGC1" /></td>
+        <td><input type="text" placeholder="Vendor" /></td>
+        <td><input type="date" /></td>
+        <td><input type="date" /></td>
+        <td><button onclick="removeRow(this)">🗑️</button></td>
+      `;
+      tbody.appendChild(row);
+    }
+
+    function removeRow(btn) {
+      btn.closest("tr").remove();
+    }
+
+    function saveData() {
+      const rows = document.querySelectorAll("#tableBody tr");
+      const data = [];
+
+      rows.forEach(row => {
+        const inputs = row.querySelectorAll("input");
+        if (inputs[0].value && inputs[2].value && inputs[3].value) {
+          data.push({
+            equipment: inputs[0].value,
+            vendor: inputs[1].value,
+            start: inputs[2].value,
+            end: inputs[3].value
+          });
+        }
+      });
+
+      localStorage.setItem("gantData", JSON.stringify(data));
+      alert("Data saved. Open the chart page to view the Gantt chart.");
+    }
+  </script>
+</body>
+</html>
+
